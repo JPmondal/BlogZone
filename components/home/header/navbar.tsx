@@ -1,10 +1,23 @@
+"use client";
+
 import React from "react";
 import { Button } from "../../ui/button";
 import Link from "next/link";
 import SearchInput from "./search-input";
 import ToggleMode from "./toggle-mode";
+import { Menu, Search, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/nextjs";
 
 const Navbar = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
   return (
     <nav className="sticky top-0 w-full z-50 border border-b backdrop-blur bg-background/95 supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -53,13 +66,83 @@ const Navbar = () => {
           <div className="flex items-center gap-4">
             <SearchInput />
             <ToggleMode />
-            <div className="hidden md:flex items-center gap-2">
+
+            {/* user log in  */}
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+
+            <SignedOut>
+              <div className="hidden md:flex items-center gap-2">
+                <SignInButton>
+                  <Button variant={"outline"}>Login</Button>
+                </SignInButton>
+
+                <SignUpButton>
+                  <Button>Sign Up</Button>
+                </SignUpButton>
+              </div>
+            </SignedOut>
+          </div>
+
+          {/* Mobile menu button  */}
+          <Button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            size={"icon"}
+            className="md:hidden text-muted-foreground hover:text-foreground"
+            variant={"ghost"}
+          >
+            {isMobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </Button>
+        </div>
+
+        {/* mobile view  */}
+        {isMobileMenuOpen && (
+          <div className="mb-4 md:hidden flex flex-col gap-3 transition-all">
+            <div className="relative">
+              <Search className="absolute top-1/2 -translate-y-1/2 left-2" />
+              <Input placeholder="Search..." className="w-full pl-10 py-5" />
+            </div>
+            <div className="flex flex-col justify-center gap-3 px-2">
+              <Link
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-md  text-foreground hover:text-blue-700 transition-colors"
+                href="/dashboard"
+              >
+                Article
+              </Link>
+              <Link
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-md  text-foreground hover:text-blue-700 transition-colors"
+                href="/dashboard"
+              >
+                Tutorials
+              </Link>
+              <Link
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-md  text-foreground hover:text-blue-700 transition-colors"
+                href="/dashboard"
+              >
+                Blogs
+              </Link>
+              <Link
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-md  text-foreground hover:text-blue-700 transition-colors"
+                href="/dashboard"
+              >
+                Dashboard
+              </Link>
+            </div>
+            <div className="flex flex-col gap-2">
               <Button>Login</Button>
-              <Button>Sign Up</Button>
+              <Button variant={"outline"}>Sign Up</Button>
             </div>
           </div>
-          
-        </div>
+        )}
       </div>
     </nav>
   );
