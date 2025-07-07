@@ -68,7 +68,7 @@ const DashBoardSideBar = ({ closeSheet }: { closeSheet: () => void }) => {
           Overview
         </Button>
       </Link>
-      <Link href={"/articles"}>
+      <Link href={"/dashboard/articles/create"}>
         <Button
           onClick={closeSheet}
           className="w-full cursor-pointer flex justify-start text-sm"
