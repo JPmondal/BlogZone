@@ -1,10 +1,11 @@
-import React from "react";
+"use client";
+
+import React, { startTransition, useTransition } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ArrowRightIcon } from "lucide-react";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -13,8 +14,26 @@ import {
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { Prisma } from "@/app/generated/prisma";
+import { useFormState, useFormStatus } from "react-dom";
+import { deleteArticle } from "@/actions/delete-article";
 
-const RecentArticles = () => {
+type RecentArticlesProps = {
+  articles: Prisma.ArticleGetPayload<{
+    include: {
+      comments: true;
+      author: {
+        select: {
+          name: true;
+          email: true;
+          imageUrl: true;
+        };
+      };
+    };
+  }>;
+};
+
+const RecentArticles: React.FC<RecentArticlesProps> = ({ articles }) => {
   return (
     <div className="mt-4">
       <Card>
@@ -34,29 +53,37 @@ const RecentArticles = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell>Blog title</TableCell>
-                <TableCell>
-                  <Badge
-                    className="bg-green-700 text-white"
-                    variant="secondary"
-                  >
-                    Published
-                  </Badge>
-                </TableCell>
-                <TableCell>2</TableCell>
-                <TableCell>2 Feb</TableCell>
-                <TableCell>
-                  <div className="flex gap-2 items-center">
-                    <Link href={`/dashboard/edit/${1234}`}>
-                    <Button className="cursor-pointer" size={"sm"} variant="outline">
-                      Edit
-                    </Button>
-                  </Link>
-                  <DeleteButton />
-                  </div>
-                </TableCell>
-              </TableRow>
+              {articles.map((article) => (
+                <TableRow key={article.id}>
+                  <TableCell>{article.title}</TableCell>
+                  <TableCell>
+                    <Badge
+                      className="bg-green-700 text-white"
+                      variant="secondary"
+                    >
+                      Published
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{article.comments.length}</TableCell>
+                  <TableCell>
+                    {article.createdAt.toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2 items-center">
+                      <Link href={`/dashboard/articles/${article.id}/edit`}>
+                        <Button
+                          className="cursor-pointer"
+                          size={"sm"}
+                          variant="outline"
+                        >
+                          Edit
+                        </Button>
+                      </Link>
+                      <DeleteButton articleId={article.id} />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </CardContent>
@@ -67,11 +94,29 @@ const RecentArticles = () => {
 
 export default RecentArticles;
 
-const DeleteButton = () => {
+type DeleteButtonProps = {
+  articleId: string;
+};
+
+const DeleteButton: React.FC<DeleteButtonProps> = ({ articleId }) => {
+  const [isPending, startTransition] = useTransition();
+
   return (
-    <form>
-      <Button size={"sm"} type="submit" className="cursor-pointer" variant={"outline"}>
-        Delete
+    <form
+      action={() => {
+        startTransition(async () => {
+          await deleteArticle(articleId);
+        });
+      }}
+    >
+      <Button
+        disabled={isPending}
+        size={"sm"}
+        type="submit"
+        className="cursor-pointer"
+        variant={"outline"}
+      >
+        {isPending ? "Deleting..." : "Delete"}
       </Button>
     </form>
   );
