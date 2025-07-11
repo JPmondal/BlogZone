@@ -6,6 +6,7 @@ import LikeButton from "./like-button";
 import CommentList from "../comments/comment-list";
 import CommentInput from "../comments/comment-input";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@clerk/nextjs/server";
 
 type ArticleDetailPageProps = {
   article: Prisma.ArticleGetPayload<{
@@ -38,6 +39,23 @@ const ArticleDetailPage: React.FC<ArticleDetailPageProps> = async ({
       },
     },
   });
+
+  const likes = await prisma.like.findMany({
+    where : {
+      articleId : article.id
+    }
+  })
+
+  const {userId} = await auth()
+
+  const user = await prisma.user.findUnique({
+    where : {
+        clerkUserId : userId as string
+    }
+  })
+
+  const isLiked : boolean = likes.some((like)=> like.userId === user?.id)
+
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
@@ -64,7 +82,7 @@ const ArticleDetailPage: React.FC<ArticleDetailPageProps> = async ({
           />
 
           {/* Article action buttons  */}
-          <LikeButton />
+          <LikeButton articleId={article.id} isLiked={isLiked} likes={likes}/>
 
           {/* Comment Input  */}
           <CommentInput articleId={article.id} />

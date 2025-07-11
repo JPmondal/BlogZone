@@ -14,6 +14,7 @@ import {
   SignUpButton,
   UserButton,
 } from "@clerk/nextjs";
+import { searchAction } from "@/actions/search";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -83,7 +84,7 @@ const Navbar = () => {
                 </SignUpButton>
               </div>
             </SignedOut>
-          </div>
+          
 
           {/* Mobile menu button  */}
           <Button
@@ -98,20 +99,21 @@ const Navbar = () => {
               <Menu className="h-6 w-6" />
             )}
           </Button>
+          </div>
         </div>
 
         {/* mobile view  */}
         {isMobileMenuOpen && (
           <div className="mb-4 md:hidden flex flex-col gap-3 transition-all">
-            <div className="relative">
+            <form action={searchAction} className="relative">
               <Search className="absolute top-1/2 -translate-y-1/2 left-2" />
-              <Input placeholder="Search..." className="w-full pl-10 py-5" />
-            </div>
+              <Input name="search" placeholder="Search..." className="w-full pl-10 py-5" />
+            </form>
             <div className="flex flex-col justify-center gap-3 px-2">
               <Link
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="text-md  text-foreground hover:text-blue-700 transition-colors"
-                href="/dashboard"
+                href="/articles"
               >
                 Article
               </Link>
